@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	togglAPIBaseURL               = "https://api.track.toggl.com/api/v8"
-	currentUserWithRelatedDataURI = "/me?with_related_data=true"
+	togglAPIBaseURL = "https://api.track.toggl.com/api/v8"
+	timeEntriesURI  = "/time_entries"
 )
 
 type Client struct {
@@ -51,8 +51,8 @@ func decodeBody(resp *http.Response, out interface{}) error {
 	return decoder.Decode(out)
 }
 
-func (c *Client) GetTimeEntriesGroupByProject(ctx context.Context) (*User, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, currentUserWithRelatedDataURI, nil)
+func (c *Client) GetTimeEntriesGroupByProject(ctx context.Context) (*TimeEntries, error) {
+	req, err := c.newRequest(ctx, http.MethodGet, timeEntriesURI, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +64,10 @@ func (c *Client) GetTimeEntriesGroupByProject(ctx context.Context) (*User, error
 
 	// TODO: check status code
 
-	var user User
-	if err := decodeBody(res, &user); err != nil {
+	var timeEntries TimeEntries
+	if err := decodeBody(res, &timeEntries); err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &timeEntries, nil
 }

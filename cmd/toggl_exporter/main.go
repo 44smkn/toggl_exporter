@@ -18,6 +18,14 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+const (
+	namespace = "toggl"
+)
+
+var (
+	timeEntries = prometheus.NewDesc(prometheus.BuildFQName(namespace, "time_entries", "seconds"), "total time for time entiries", []string{"project_name"}, nil)
+)
+
 type Exporter struct {
 	mutex       sync.RWMutex
 	togglClient *toggl.Client
@@ -33,7 +41,7 @@ func NewExporter(togglAPIKey string, togglTimeout int, logger log.Logger) *Expor
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	// TODO: add implementation
+	ch <- timeEntries
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
