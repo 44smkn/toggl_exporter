@@ -45,7 +45,11 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	// TODO: add implementation
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	// call
+	ch <- prometheus.MustNewConstMetric(timeEntries, prometheus.CounterValue, 0)
 }
 
 func main() {
@@ -64,7 +68,7 @@ func main() {
 	kingpin.Parse()
 	logger := promlog.New(promlogConfig)
 
-	level.Info(logger).Log("msg", "Starting haproxy_exporter", "version", version.Info())
+	level.Info(logger).Log("msg", "Starting toggl_exporter", "version", version.Info())
 	level.Info(logger).Log("msg", "Build context", "context", version.BuildContext())
 
 	exporter := NewExporter(*togglAPIKey, *togglTimeout, logger)
@@ -75,9 +79,9 @@ func main() {
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-<head><title>Haproxy Exporter</title></head>
+<head><title>Toggl Exporter</title></head>
 <body>
-<h1>Haproxy Exporter</h1>
+<h1>Toggl Exporter</h1>
 <p><a href='` + *metricsPath + `'>Metrics</a></p>
 </body>
 </html>`))
