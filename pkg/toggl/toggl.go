@@ -3,6 +3,8 @@ package toggl
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,10 +23,10 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(apiKey string, timeout int) *Client {
+func NewClient(apiKey string, timeout time.Duration) *Client {
 	parsedURL, _ := url.ParseRequestURI(togglAPIBaseURL)
 	httpClient := &http.Client{
-		Timeout: time.Duration(timeout),
+		Timeout: timeout,
 	}
 	return &Client{
 		apiKey:     apiKey,
@@ -42,6 +44,7 @@ func (c *Client) newRequest(ctx context.Context, method, spath string, body io.R
 	}
 
 	req = req.WithContext(ctx)
+	req.SetBasicAuth(c.apiKey, "api_token")
 	return req, nil
 }
 
@@ -51,7 +54,7 @@ func decodeBody(resp *http.Response, out interface{}) error {
 	return decoder.Decode(out)
 }
 
-func (c *Client) GetTimeEntriesGroupByProject(ctx context.Context) (*TimeEntries, error) {
+func (c *Client) GetTimeEntries(ctx context.Context) ([]TimeEntry, error) {
 	req, err := c.newRequest(ctx, http.MethodGet, timeEntriesURI, nil)
 	if err != nil {
 		return nil, err
@@ -62,12 +65,15 @@ func (c *Client) GetTimeEntriesGroupByProject(ctx context.Context) (*TimeEntries
 		return nil, err
 	}
 
-	// TODO: check status code
+	switch res.StatusCode {
+	case http.StatusForbidden:
+		return nil, errors.New(fmt.Sprintf("APIKey may be not valid. status is %v", res.Status))
+	}
 
-	var timeEntries TimeEntries
+	var timeEntries []TimeEntry
 	if err := decodeBody(res, &timeEntries); err != nil {
 		return nil, err
 	}
 
-	return &timeEntries, nil
+	return timeEntries, nil
 }
