@@ -2,7 +2,7 @@ package toggl
 
 import "time"
 
-type TimeEntries []struct {
+type TimeEntry struct {
 	ID          int       `json:"id"`
 	Wid         int       `json:"wid"`
 	Pid         int       `json:"pid,omitempty"`
