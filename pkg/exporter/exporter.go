@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries by project", []string{"project_name"}, nil)
+	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries by project", []string{"project_name", "month"}, nil)
 )
 
 type Exporter struct {
@@ -41,6 +41,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 	for _, pd := range pds {
-		ch <- prometheus.MustNewConstMetric(projectDuration, prometheus.CounterValue, pd.Duration.Seconds(), pd.ProjectName)
+		ch <- prometheus.MustNewConstMetric(projectDuration, prometheus.CounterValue, pd.Duration.Seconds(), pd.ProjectName, pd.YearMonth)
 	}
 }
