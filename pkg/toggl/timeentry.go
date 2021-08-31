@@ -54,7 +54,7 @@ func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeE
 
 	timeEntries := make([]model.TimeEntry, 0, len(rawTimeEntries))
 	for _, re := range rawTimeEntries {
-		duration := re.Duration
+		duration := re.Duration * time.Second
 		if duration < 0 {
 			duration = time.Now().Sub(re.Start)
 		}
