@@ -3,8 +3,9 @@ package main
 import (
 	"net/http"
 	"os"
-	"sync"
+	"time"
 
+	"github.com/44smkn/toggl_exporter/pkg/exporter"
 	"github.com/44smkn/toggl_exporter/pkg/toggl"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -18,47 +19,13 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-const (
-	namespace = "toggl"
-)
-
-var (
-	timeEntries = prometheus.NewDesc(prometheus.BuildFQName(namespace, "time_entries", "seconds"), "total time for time entiries", []string{"project_name"}, nil)
-)
-
-type Exporter struct {
-	mutex       sync.RWMutex
-	togglClient *toggl.Client
-	logger      log.Logger
-}
-
-func NewExporter(togglAPIKey string, togglTimeout int, logger log.Logger) *Exporter {
-	togglClient := toggl.NewClient(togglAPIKey, togglTimeout)
-	return &Exporter{
-		togglClient: togglClient,
-		logger:      logger,
-	}
-}
-
-func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	ch <- timeEntries
-}
-
-func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	e.mutex.Lock()
-	defer e.mutex.Unlock()
-
-	// call
-	ch <- prometheus.MustNewConstMetric(timeEntries, prometheus.CounterValue, 0)
-}
-
 func main() {
 	var (
 		webConfig     = webflag.AddFlags(kingpin.CommandLine)
 		listenAddress = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9981").Envar("WEB_LISTEN_ADDRESS").String()
 		metricsPath   = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").Envar("WEB_TELEMETRY_PATH").String()
 		togglAPIKey   = kingpin.Flag("toggl.api-key", "write later...").Envar("TOGGL_API_KEY").String()
-		togglTimeout  = kingpin.Flag("toggl.req-timeout-seconds", "Timeout for trying").Envar("TOGGL_REQ_TIMEOUT_SECONDS").Int()
+		togglTimeout  = kingpin.Flag("toggl.req-timeout-seconds", "Timeout for trying").Envar("TOGGL_REQ_TIMEOUT_SECONDS").Duration()
 	)
 
 	promlogConfig := &promlog.Config{}
@@ -91,5 +58,18 @@ func main() {
 	if err := web.ListenAndServe(srv, *webConfig, logger); err != nil {
 		level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
 		os.Exit(1)
+	}
+}
+
+func NewExporter(togglAPIKey string, togglTimeout time.Duration, logger log.Logger) *exporter.Exporter {
+	client := toggl.NewClient(togglAPIKey, togglTimeout)
+	timeEntryRepository := &toggl.TimeEntryRepository{Client: client}
+	projectRepository := &toggl.ProjectRepository{Client: client}
+
+	return &exporter.Exporter{
+		Logger: logger,
+
+		TimeEntryRepository: timeEntryRepository,
+		ProjectRepository:   projectRepository,
 	}
 }
