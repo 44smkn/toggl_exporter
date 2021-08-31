@@ -13,7 +13,7 @@ const (
 )
 
 var (
-	timeEntries = prometheus.NewDesc(prometheus.BuildFQName(namespace, "time_entries", "seconds"), "total time for time entiries", []string{"project_name"}, nil)
+	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries", []string{"project_name"}, nil)
 )
 
 type Exporter struct {
@@ -25,7 +25,7 @@ type Exporter struct {
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	ch <- timeEntries
+	ch <- projectDuration
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
@@ -33,5 +33,5 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	defer e.mutex.Unlock()
 
 	// call
-	ch <- prometheus.MustNewConstMetric(timeEntries, prometheus.CounterValue, 0)
+	ch <- prometheus.MustNewConstMetric(projectDuration, prometheus.CounterValue, 0)
 }
