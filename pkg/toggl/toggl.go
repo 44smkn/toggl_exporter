@@ -32,15 +32,17 @@ func NewClient(apiKey string, timeout time.Duration) *Client {
 	}
 }
 
-func (c *Client) newRequest(ctx context.Context, method, spath string, body io.Reader) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, method, spath string, rawQuery *string, body io.Reader) (*http.Request, error) {
 	u := *c.URL
 	u.Path = path.Join(c.URL.Path, spath)
-	req, err := http.NewRequest(method, u.String(), body)
+	if rawQuery != nil {
+		u.RawQuery = *rawQuery
+	}
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
 	if err != nil {
 		return nil, err
 	}
 
-	req = req.WithContext(ctx)
 	req.SetBasicAuth(c.apiKey, "api_token")
 	return req, nil
 }

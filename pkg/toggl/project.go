@@ -35,7 +35,7 @@ type ProjectRepository struct {
 
 func (r *ProjectRepository) GetProject(ctx context.Context, pid string) (*model.Project, error) {
 	uri := fmt.Sprintf("%s/%s", projectURI, pid)
-	req, err := r.newRequest(ctx, http.MethodGet, uri, nil)
+	req, err := r.newRequest(ctx, http.MethodGet, uri, nil, nil)
 	if err != nil {
 		return nil, err
 	}

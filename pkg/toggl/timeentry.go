@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/44smkn/toggl_exporter/pkg/model"
@@ -12,6 +13,7 @@ import (
 
 const (
 	timeEntriesURI = "/time_entries"
+	ISO8601        = "2006-01-02T15:04:05-07:00"
 )
 
 type TimeEntry struct {
@@ -32,10 +34,13 @@ type TimeEntryRepository struct {
 }
 
 func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeEntry, error) {
-	req, err := r.newRequest(ctx, http.MethodGet, timeEntriesURI, nil)
+	query := fmt.Sprintf("start_date=%s", getBeginningOfMonthQueryParam(time.Now().UTC()))
+	req, err := r.newRequest(ctx, http.MethodGet, timeEntriesURI, &query, nil)
 	if err != nil {
 		return nil, err
 	}
+	dgurl := req.URL.RequestURI()
+	fmt.Println(dgurl)
 
 	res, err := r.httpClient.Do(req)
 	if err != nil {
@@ -45,6 +50,8 @@ func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeE
 	switch res.StatusCode {
 	case http.StatusForbidden:
 		return nil, errors.New(fmt.Sprintf("APIKey may be not valid. status is %v", res.Status))
+	case http.StatusNotFound:
+		return nil, errors.New(fmt.Sprintf("url parameter may be not valid. status is %v", res.Status))
 	}
 
 	var rawTimeEntries []TimeEntry
@@ -67,4 +74,8 @@ func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeE
 	}
 
 	return timeEntries, nil
+}
+
+func getBeginningOfMonthQueryParam(now time.Time) string {
+	return url.QueryEscape(time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).Format(ISO8601))
 }
