@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries", []string{"project_name"}, nil)
+	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries by project", []string{"project_name"}, nil)
 )
 
 type Exporter struct {
