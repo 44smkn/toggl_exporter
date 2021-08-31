@@ -39,8 +39,6 @@ func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeE
 	if err != nil {
 		return nil, err
 	}
-	dgurl := req.URL.RequestURI()
-	fmt.Println(dgurl)
 
 	res, err := r.httpClient.Do(req)
 	if err != nil {
