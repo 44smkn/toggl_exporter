@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 	"time"
 
@@ -9,12 +8,9 @@ import (
 	"github.com/44smkn/toggl_exporter/pkg/toggl"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/promlog/flag"
 	"github.com/prometheus/common/version"
-	"github.com/prometheus/exporter-toolkit/web"
 	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -39,23 +35,7 @@ func main() {
 	level.Info(logger).Log("msg", "Build context", "context", version.BuildContext())
 
 	exporter := NewExporter(*togglAPIKey, *togglTimeout, logger)
-	prometheus.MustRegister(exporter)
-	prometheus.MustRegister(version.NewCollector("toggl_exporter"))
-
-	level.Info(logger).Log("msg", "Listening on address", "address", *listenAddress)
-	http.Handle(*metricsPath, promhttp.Handler())
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`<html>
-<head><title>Toggl Exporter</title></head>
-<body>
-<h1>Toggl Exporter</h1>
-<p><a href='` + *metricsPath + `'>Metrics</a></p>
-</body>
-</html>`))
-	})
-
-	srv := &http.Server{Addr: *listenAddress}
-	if err := web.ListenAndServe(srv, *webConfig, logger); err != nil {
+	if err := exporter.ListenAndServe(*listenAddress, *webConfig, *metricsPath); err != nil {
 		level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
 		os.Exit(1)
 	}

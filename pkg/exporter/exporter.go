@@ -3,12 +3,16 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/44smkn/toggl_exporter/pkg/model"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
+	"github.com/prometheus/exporter-toolkit/web"
 )
 
 const (
@@ -44,4 +48,27 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	for _, pd := range pds {
 		ch <- prometheus.MustNewConstMetric(projectDuration, prometheus.CounterValue, pd.Duration.Seconds(), pd.ProjectName, pd.YearMonth)
 	}
+}
+
+func (e *Exporter) ListenAndServe(listenAddress, webConfig, metricsPath string) error {
+	prometheus.MustRegister(e)
+	prometheus.MustRegister(version.NewCollector("toggl_exporter"))
+
+	level.Info(e.Logger).Log("msg", "Listening on address", "address", listenAddress)
+	http.Handle(metricsPath, promhttp.Handler())
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`<html>
+<head><title>Toggl Exporter</title></head>
+<body>
+<h1>Toggl Exporter</h1>
+<p><a href='` + metricsPath + `'>Metrics</a></p>
+</body>
+</html>`))
+	})
+
+	srv := &http.Server{Addr: listenAddress}
+	if err := web.ListenAndServe(srv, webConfig, e.Logger); err != nil {
+		return err
+	}
+	return nil
 }
