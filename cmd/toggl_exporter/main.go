@@ -14,8 +14,7 @@ func main() {
 	promlogConfig := &promlog.Config{}
 	logger := promlog.New(promlogConfig)
 	exporter := config.InitExporter(promlogConfig, logger)
-	prometheus.MustRegister(exporter)
-	prometheus.MustRegister(version.NewCollector("toggl_exporter"))
+	prometheus.MustRegister(exporter, version.NewCollector("toggl_exporter"))
 	if err := exporter.ListenAndServe(); err != nil {
 		level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
 		os.Exit(1)
