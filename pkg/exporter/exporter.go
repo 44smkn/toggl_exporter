@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/44smkn/toggl_exporter/pkg/model"
@@ -37,7 +38,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	pds, err := e.GetProjectDurations(ctx)
 	if err != nil {
-		level.Error(e.Logger).Log("msg", "failed to get project durations: %v", err)
+		level.Error(e.Logger).Log("msg", fmt.Sprintf("failed to get project durations: %v", err))
 		return
 	}
 	for _, pd := range pds {

@@ -28,12 +28,12 @@ func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDurati
 	}
 
 	now := time.Now().UTC()
-	yearMonth := fmt.Sprintf("%v/%v", now.Year(), now.Month())
+	yearMonth := fmt.Sprintf("%v/%d", now.Year(), now.Month())
 	ptj := make([]ProjectTimeDuration, 0, len(m))
 	for pid, duration := range m {
 		project, err := e.GetProject(ctx, strconv.Itoa(pid))
 		if err != nil {
-			level.Info(e.Logger).Log("err", err.Error())
+			level.Info(e.Logger).Log("msg", err.Error(), "pid", pid)
 			continue
 		}
 		p := ProjectTimeDuration{
