@@ -24,6 +24,10 @@ var (
 )
 
 type Exporter struct {
+	WebConfig     string
+	ListenAddress string
+	MetricsPath   string
+
 	mutex  sync.RWMutex
 	Logger log.Logger
 
@@ -50,24 +54,24 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (e *Exporter) ListenAndServe(listenAddress, webConfig, metricsPath string) error {
+func (e *Exporter) ListenAndServe() error {
 	prometheus.MustRegister(e)
 	prometheus.MustRegister(version.NewCollector("toggl_exporter"))
 
-	level.Info(e.Logger).Log("msg", "Listening on address", "address", listenAddress)
-	http.Handle(metricsPath, promhttp.Handler())
+	level.Info(e.Logger).Log("msg", "Listening on address", "address", e.ListenAddress)
+	http.Handle(e.MetricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
 <head><title>Toggl Exporter</title></head>
 <body>
 <h1>Toggl Exporter</h1>
-<p><a href='` + metricsPath + `'>Metrics</a></p>
+<p><a href='` + e.MetricsPath + `'>Metrics</a></p>
 </body>
 </html>`))
 	})
 
-	srv := &http.Server{Addr: listenAddress}
-	if err := web.ListenAndServe(srv, webConfig, e.Logger); err != nil {
+	srv := &http.Server{Addr: e.ListenAddress}
+	if err := web.ListenAndServe(srv, e.WebConfig, e.Logger); err != nil {
 		return err
 	}
 	return nil
