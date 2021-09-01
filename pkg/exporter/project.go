@@ -31,6 +31,9 @@ func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDurati
 	yearMonth := fmt.Sprintf("%v/%d", now.Year(), now.Month())
 	ptj := make([]ProjectTimeDuration, 0, len(m))
 	for pid, duration := range m {
+		if pid == 0 {
+			continue
+		}
 		project, err := e.GetProject(ctx, strconv.Itoa(pid))
 		if err != nil {
 			level.Info(e.Logger).Log("msg", err.Error(), "pid", pid)
