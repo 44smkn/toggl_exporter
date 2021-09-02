@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -13,7 +12,8 @@ type ProjectTimeDuration struct {
 	Pid         int
 	ProjectName string
 	Duration    time.Duration
-	YearMonth   string
+	Year        string
+	Month       string
 }
 
 func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDuration, error) {
@@ -28,7 +28,9 @@ func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDurati
 	}
 
 	now := time.Now().UTC()
-	yearMonth := fmt.Sprintf("%v/%d", now.Year(), now.Month())
+	year := strconv.Itoa(now.Year())
+	month := now.Month().String()
+
 	ptj := make([]ProjectTimeDuration, 0, len(m))
 	for pid, duration := range m {
 		if pid == 0 {
@@ -43,7 +45,8 @@ func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDurati
 			Pid:         pid,
 			ProjectName: project.Name,
 			Duration:    duration,
-			YearMonth:   yearMonth,
+			Year:        year,
+			Month:       month,
 		}
 		ptj = append(ptj, p)
 	}
