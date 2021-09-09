@@ -57,6 +57,6 @@ See: https://github.com/44smkn/toggl_exporter_serverless
 
 ## Collectors
 
-| Name            | Description |
-| --------------- | ----------- |
-| ProjectDuration | Title       |
+| Name            | Description                              |
+| --------------- | ---------------------------------------- |
+| ProjectDuration | sum of time entry grouped by the project |
