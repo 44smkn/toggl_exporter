@@ -14,12 +14,14 @@ const (
 	togglAPIBaseURL = "https://api.track.toggl.com/api/v8"
 )
 
+// Client facilitates making HTTP requests to the Toggl API
 type Client struct {
 	apiKey     string
 	URL        *url.URL
 	httpClient *http.Client
 }
 
+// NewClient initializes a Client
 func NewClient(apiKey string, timeout time.Duration) *Client {
 	parsedURL, _ := url.ParseRequestURI(togglAPIBaseURL)
 	httpClient := &http.Client{

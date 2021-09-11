@@ -14,6 +14,9 @@ const (
 	projectURI = "/projects"
 )
 
+// Project is the object representing project in toggl world.
+// It is bound with Get project data API Response of toggl.
+// See: https://github.com/toggl/toggl_api_docs/blob/master/chapters/projects.md#get-project-data
 type Project struct {
 	Data struct {
 		ID        int       `json:"id"`
@@ -33,6 +36,8 @@ type ProjectRepository struct {
 	*Client
 }
 
+// GetProject returns the object representing project in toggl_exporter.
+// It retrive the project detail using passed pid and create peculiar toggl project object.
 func (r *ProjectRepository) GetProject(ctx context.Context, pid string) (*model.Project, error) {
 	uri := fmt.Sprintf("%s/%s", projectURI, pid)
 	req, err := r.newRequest(ctx, http.MethodGet, uri, nil, nil)

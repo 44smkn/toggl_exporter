@@ -16,6 +16,9 @@ const (
 	ISO8601        = "2006-01-02T15:04:05-07:00"
 )
 
+// TimeEntry is the object representing the time entry in toggl world.
+// It is bound with Get time_entries API Response of toggl.
+// See: https://github.com/toggl/toggl_api_docs/blob/master/chapters/time_entries.md#get-time-entry-details
 type TimeEntry struct {
 	ID          int           `json:"id"`
 	Wid         int           `json:"wid"`
@@ -33,6 +36,8 @@ type TimeEntryRepository struct {
 	*Client
 }
 
+// GetProject returns array of objects representing time entries in toggl_exporter.
+// It retrive time entries data bound with api key and create array of peculiar time entry object.
 func (r *TimeEntryRepository) GetTimeEntries(ctx context.Context) ([]model.TimeEntry, error) {
 	query := fmt.Sprintf("start_date=%s", getBeginningOfMonthQueryParam(time.Now().UTC()))
 	req, err := r.newRequest(ctx, http.MethodGet, timeEntriesURI, &query, nil)
