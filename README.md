@@ -1,5 +1,6 @@
 # toggl_exporter
 
+![tests](https://github.com/44smkn/toggl_exporter/actions/workflows/tests.yaml/badge.svg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/44smkn/toggl_exporter.svg)](https://pkg.go.dev/github.com/44smkn/toggl_exporter)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
