@@ -1,5 +1,6 @@
 # toggl_exporter
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/44smkn/toggl_exporter.svg)](https://pkg.go.dev/github.com/44smkn/toggl_exporter)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This is a simple server that scrapes [toggl track](https://toggl.com/track/) stats and exports them via HTTP for Prometheus consumption.
