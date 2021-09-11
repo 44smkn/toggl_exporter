@@ -8,6 +8,7 @@ import (
 	"github.com/go-kit/log/level"
 )
 
+// ProjectTimeDuration is sum of time entry grouped by the project.
 type ProjectTimeDuration struct {
 	Pid         int
 	ProjectName string
@@ -16,6 +17,7 @@ type ProjectTimeDuration struct {
 	Month       string
 }
 
+// GetProjectDurations get time entries and calculate sum of time grouped by the project.
 func (e *Exporter) GetProjectDurations(ctx context.Context) ([]ProjectTimeDuration, error) {
 	timeEntries, err := e.GetTimeEntries(ctx)
 	if err != nil {

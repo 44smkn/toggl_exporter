@@ -22,6 +22,8 @@ var (
 	projectDuration = prometheus.NewDesc(prometheus.BuildFQName(namespace, "project_duration", "seconds"), "total time for time entiries by project", []string{"project_name", "year", "month"}, nil)
 )
 
+// Exporter collects Toggl stats from toggl API Response and exports them using
+// the prometheus metrics package.
 type Exporter struct {
 	WebConfig     string
 	ListenAddress string
@@ -34,10 +36,14 @@ type Exporter struct {
 	model.ProjectRepository
 }
 
+// Describe describes all the metrics ever exported by the toggl exporter. It
+// implements prometheus.Collector.
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- projectDuration
 }
 
+// Collect fetches the stats from Toggl API Responce and delivers them
+// as Prometheus metrics. It implements prometheus.Collector.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -53,6 +59,8 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
+// ListenAndServe listens on the TCP network address congured address and then
+// calls Serve to handle requests on incoming connections.
 func (e *Exporter) ListenAndServe() error {
 	level.Info(e.Logger).Log("msg", "Listening on address", "address", e.ListenAddress)
 	http.Handle(e.MetricsPath, promhttp.Handler())

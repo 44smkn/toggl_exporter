@@ -20,6 +20,7 @@ var (
 	togglTimeout  = kingpin.Flag("toggl.req-timeout-seconds", "Timeout for trying").Envar("TOGGL_REQ_TIMEOUT_SECONDS").Duration()
 )
 
+// InitExporter initialize Exporter using command-line flag or environment variables.
 func InitExporter(promlogConfig *promlog.Config, logger log.Logger) *exporter.Exporter {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.Version(version.Print("toggl_exporter"))
